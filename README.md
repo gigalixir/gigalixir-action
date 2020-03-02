@@ -22,7 +22,7 @@ deploy:
         ref: master # Checkout out master instead of the latest commit
         fetch-depth: 0 # Checkout the whole branch
 
-    - uses: ./.github/actions/gigalixir
+    - uses: mhanberg/gigalixir-action@<current release>
       with:
         GIGALIXIR_USERNAME: ${{ secrets.GIGALIXIR_USERNAME }}
         GIGALIXIR_PASSWORD: ${{ secrets.GIGALIXIR_PASSWORD }}
