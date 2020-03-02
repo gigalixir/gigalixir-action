@@ -1,0 +1,29 @@
+{
+  "name": "gigalixir-action",
+  "version": "0.1.0",
+  "description": "Action to deploy to gigalixir",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint index.js",
+    "package": "ncc build index.js -o dist",
+    "test": "eslint index.js && jest"
+  },
+  "keywords": [
+    "GitHub",
+    "Actions",
+    "JavaScript",
+    "Gigalixir"
+  ],
+  "author": "Mitchell Hanberg",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.1.1",
+    "@actions/exec": "^1.0.3",
+    "@actions/io": "^1.0.2"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "eslint": "^6.3.0",
+    "jest": "^24.9.0"
+  }
+}

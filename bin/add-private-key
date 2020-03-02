@@ -1,0 +1,11 @@
+#! /usr/bin/env bash
+
+set -ev
+
+mkdir ~/.ssh
+
+printf "Host *\n StrictHostKeyChecking no" > ~/.ssh/config
+
+echo "$1" > ~/.ssh/id_rsa
+
+chmod 400 ~/.ssh/id_rsa
