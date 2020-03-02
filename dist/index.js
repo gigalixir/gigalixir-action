@@ -985,7 +985,7 @@ async function waitForNewRelease(oldRelease, app, multiplier) {
   if (await isNextReleaseHealthy(oldRelease + 1, app)) {
     return await Promise.resolve(true);
   } else {
-    if (multiplier <= 5) {
+    if (multiplier <= 10) {
       await wait(Math.pow(2, multiplier));
 
       await waitForNewRelease(oldRelease, app, multiplier + 1);
