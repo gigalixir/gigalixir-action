@@ -13,6 +13,10 @@ inputs:
   GIGALIXIR_APP:
     description: 'Your gigalixir app name'
     required: true
+  RUN_MIGRATIONS:
+    description: 'Whether or not to run migrations'
+    required: true
+    default: 'true'
 
 runs:
   using: 'node12'

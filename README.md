@@ -28,6 +28,7 @@ deploy:
         GIGALIXIR_PASSWORD: ${{ secrets.GIGALIXIR_PASSWORD }}
         GIGALIXIR_APP: my-gigalixir-app # Feel free to also put this in your secrets
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        RUN_MIGRATIONS: false  # defaults to "true"
 ```
 
 ## Migrations
@@ -39,8 +40,6 @@ The migrations are run with the `gigalixir ps:migrate` command, which requires h
 Please see the docs for [How to Run Migrations](https://gigalixir.readthedocs.io/en/latest/main.html#migrations) for more information.
 
 If your migrations fail, the action will rollback the app to the last version.
-
-Note: The migrations will always be run, so if you application doesn't have a database, please submit a PR to be able to configure the behavior.
 
 ## Contributing
 
