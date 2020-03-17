@@ -1021,7 +1021,7 @@ async function run() {
     const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', { required: true });
     const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', { required: true });
     const gigalixirApp = core.getInput('GIGALIXIR_APP', { required: true });
-    const runMigrations = core.getInput('RUN_MIGRATIONS', { required: true });
+    const migrations = core.getInput('MIGRATIONS', { required: true });
 
     await core.group("Installing gigalixir", async () => {
       await exec.exec('sudo pip install gigalixir --ignore-installed six')
@@ -1052,7 +1052,7 @@ async function run() {
       await waitForNewRelease(currentRelease, gigalixirApp, 1);
     });
 
-    if (runMigrations === "true") {
+    if (migrations) {
       try {
         core.group("Running migrations", async () => {
           await exec.exec(`gigalixir ps:migrate -a ${gigalixirApp}`)
