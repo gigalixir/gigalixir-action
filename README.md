@@ -28,7 +28,7 @@ deploy:
         GIGALIXIR_PASSWORD: ${{ secrets.GIGALIXIR_PASSWORD }}
         GIGALIXIR_APP: my-gigalixir-app # Feel free to also put this in your secrets
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        RUN_MIGRATIONS: false  # defaults to "true"
+        MIGRATIONS: false  # defaults to true
 ```
 
 ## Migrations
