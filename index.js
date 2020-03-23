@@ -4,8 +4,8 @@ const path = require('path');
 
 function wait(seconds) {
   return new Promise(resolve => {
-    if (typeof(seconds) !== 'number') { 
-      throw new Error('seconds not a number'); 
+    if (typeof(seconds) !== 'number') {
+      throw new Error('seconds not a number');
     }
 
     core.info(`Waiting ${seconds} seconds...`);
@@ -46,7 +46,7 @@ async function waitForNewRelease(oldRelease, app, multiplier) {
     } else {
       throw "Taking too long for new release to deploy";
     }
-  } 
+  }
 }
 
 async function getCurrentRelease(app) {
@@ -70,11 +70,12 @@ async function getCurrentRelease(app) {
 }
 
 async function run() {
-  try { 
+  try {
     const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', { required: true });
     const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', { required: true });
     const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', { required: true });
     const gigalixirApp = core.getInput('GIGALIXIR_APP', { required: true });
+    const migrations = core.getInput('MIGRATIONS', { required: true });
 
     await core.group("Installing gigalixir", async () => {
       await exec.exec('sudo pip install gigalixir --ignore-installed six')
@@ -105,19 +106,21 @@ async function run() {
       await waitForNewRelease(currentRelease, gigalixirApp, 1);
     });
 
-    try {
-      core.group("Running migrations", async () => {
-        await exec.exec(`gigalixir ps:migrate -a ${gigalixirApp}`)
-      });
-    } catch (error) {
-      core.warning(`Migration failed, rolling back to the previous release: ${currentRelease}`);
-      await core.group("Rolling back", async () => {
-        await exec.exec(`gigalixir releases:rollback -a ${gigalixirApp}`)
-      });
+    if (migrations) {
+      try {
+        core.group("Running migrations", async () => {
+          await exec.exec(`gigalixir ps:migrate -a ${gigalixirApp}`)
+        });
+      } catch (error) {
+        core.warning(`Migration failed, rolling back to the previous release: ${currentRelease}`);
+        await core.group("Rolling back", async () => {
+          await exec.exec(`gigalixir releases:rollback -a ${gigalixirApp}`)
+        });
 
-      core.setFailed(error.message);
+        core.setFailed(error.message);
+      }
     }
-  } 
+  }
   catch (error) {
     core.setFailed(error.message);
   }
