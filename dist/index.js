@@ -1052,9 +1052,9 @@ async function run() {
       await waitForNewRelease(currentRelease, gigalixirApp, 1);
     });
 
-    if (migrations) {
+    if (migrations === "true") {
       try {
-        core.group("Running migrations", async () => {
+        await core.group("Running migrations", async () => {
           await exec.exec(`gigalixir ps:migrate -a ${gigalixirApp}`)
         });
       } catch (error) {
