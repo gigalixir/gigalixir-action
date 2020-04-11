@@ -95,7 +95,7 @@ async function run() {
     core.info(`The current release is ${currentRelease}`);
 
     await core.group("Deploying to gigalixir", async () => {
-      await exec.exec("git push -f gigalixir HEAD:refs/heads/master");
+      await exec.exec("git push -f gigalixir");
     });
 
     await core.group("Adding private key to gigalixir", async () => {
