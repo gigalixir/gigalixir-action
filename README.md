@@ -20,7 +20,6 @@ deploy:
     - uses: actions/checkout@v2
       with:
         ref: master # Checkout out master instead of the latest commit
-        fetch-depth: 0 # Checkout the whole branch, we can't push shallow updates
 
     - uses: mhanberg/gigalixir-action@<current release>
       with:
