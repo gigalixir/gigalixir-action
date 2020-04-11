@@ -1,19 +1,19 @@
 name: 'Gigalixir Action'
 description: 'Deploy to Gigalixir'
 inputs:
-  GIGALIXIR_USERNAME:
+  username:
     description: 'Your Gigalixir username'
     required: true
-  GIGALIXIR_PASSWORD:
+  password:
     description: 'Your Gigalixir password'
     required: true
-  SSH_PRIVATE_KEY:
+  sshPrivateKey:
     description: 'Your ssh private key that is paired with a public key that is uploaded to Gigalixir'
     required: true
-  GIGALIXIR_APP:
+  appName:
     description: 'Your gigalixir app name'
     required: true
-  MIGRATIONS:
+  migrations:
     description: 'Configuration for migrations'
     required: true
     default: true

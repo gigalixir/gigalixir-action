@@ -71,11 +71,11 @@ async function getCurrentRelease(app) {
 
 async function run() {
   try {
-    const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', { required: true });
-    const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', { required: true });
-    const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', { required: true });
-    const gigalixirApp = core.getInput('GIGALIXIR_APP', { required: true });
-    const migrations = core.getInput('MIGRATIONS', { required: true });
+    const gigalixirUsername = core.getInput('username', { required: true });
+    const gigalixirPassword = core.getInput('password', { required: true });
+    const sshPrivateKey = core.getInput('sshPrivateKey', { required: true });
+    const gigalixirApp = core.getInput('appName', { required: true });
+    const migrations = core.getInput('migrations', { required: true });
 
     await core.group("Installing gigalixir", async () => {
       await exec.exec('sudo pip install gigalixir --ignore-installed six')

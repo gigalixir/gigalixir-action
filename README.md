@@ -20,15 +20,14 @@ deploy:
     - uses: actions/checkout@v2
       with:
         ref: master # Checkout out master instead of the latest commit
-        fetch-depth: 0 # Checkout the whole branch
 
     - uses: mhanberg/gigalixir-action@<current release>
       with:
-        GIGALIXIR_USERNAME: ${{ secrets.GIGALIXIR_USERNAME }}
-        GIGALIXIR_PASSWORD: ${{ secrets.GIGALIXIR_PASSWORD }}
-        GIGALIXIR_APP: my-gigalixir-app # Feel free to also put this in your secrets
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        MIGRATIONS: false  # defaults to true
+        username: ${{ secrets.GIGALIXIR_USERNAME }}
+        password: ${{ secrets.GIGALIXIR_PASSWORD }}
+        appName: my-gigalixir-app # Feel free to also put this in your secrets
+        sshPrivateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+        migrations: false  # defaults to true
 ```
 
 ## Migrations
