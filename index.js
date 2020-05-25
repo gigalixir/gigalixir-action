@@ -98,15 +98,15 @@ async function run() {
       await exec.exec("git push -f gigalixir HEAD:refs/heads/master");
     });
 
-    await core.group("Adding private key to gigalixir", async () => {
-      await exec.exec(path.join(__dirname, "../bin/add-private-key"), [sshPrivateKey]);
-    });
-
-    await core.group("Waiting for new release to deploy", async () => {
-      await waitForNewRelease(currentRelease, gigalixirApp, 1);
-    });
-
     if (migrations === "true") {
+      await core.group("Adding private key to gigalixir", async () => {
+        await exec.exec(path.join(__dirname, "../bin/add-private-key"), [sshPrivateKey]);
+      });
+
+      await core.group("Waiting for new release to deploy", async () => {
+        await waitForNewRelease(currentRelease, gigalixirApp, 1);
+      });
+
       try {
         await core.group("Running migrations", async () => {
           await exec.exec(`gigalixir ps:migrate -a ${gigalixirApp}`)
