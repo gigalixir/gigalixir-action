@@ -29,20 +29,20 @@ async function isNextReleaseHealthy(release, app) {
     await exec.exec(`gigalixir ps -a ${app}`, [], options);
   });
 
-  const pods = JSON.parse(releasesOutput).pods;
-  const pod = pods[0];
-
-  return pods.length === 1 && parseInt(pod.version) === release && pod.status === "Healthy";
+  const releases = JSON.parse(releasesOutput);
+  const pods = releases.pods;
+  return releases.pods.filter((pod) => (Number(pod.version) === release && pod.status === "Healthy")).length >= releases.replicas_desired;
 }
 
-async function waitForNewRelease(oldRelease, app, multiplier) {
+async function waitForNewRelease(oldRelease, app, attempts) {
+  const maxAttempts = 60;
+
   if (await isNextReleaseHealthy(oldRelease + 1, app)) {
     return await Promise.resolve(true);
   } else {
-    if (multiplier <= 10) {
-      await wait(Math.pow(2, multiplier));
-
-      await waitForNewRelease(oldRelease, app, multiplier + 1);
+    if (attempts <= maxAttempts) {
+      await wait(10);
+      await waitForNewRelease(oldRelease, app, attempts + 1);
     } else {
       throw "Taking too long for new release to deploy";
     }
@@ -64,7 +64,7 @@ async function getCurrentRelease(app) {
     await exec.exec(`gigalixir releases -a ${app}`, [], options);
   });
 
-  const currentRelease = parseInt(JSON.parse(releasesOutput)[0].version);
+  const currentRelease = Number(JSON.parse(releasesOutput)[0].version);
 
   return currentRelease;
 }
