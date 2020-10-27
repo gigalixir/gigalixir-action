@@ -17,6 +17,10 @@ inputs:
     description: 'Configuration for migrations'
     required: true
     default: true
+  MIGRATION_APP_NAME:
+    description: 'Name of the app that contains migrations (useful for umbrella apps)'
+    required: false
+    default: ""
   APP_SUBFOLDER:
     description: 'Subfolder of your app'
     required: false
