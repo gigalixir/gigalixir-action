@@ -1,6 +1,6 @@
 {
   "name": "gigalixir-action",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Action to deploy to gigalixir",
   "main": "index.js",
   "scripts": {
