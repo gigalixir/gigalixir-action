@@ -32,7 +32,7 @@ async function isNextReleaseHealthy(release, app) {
   const pods = JSON.parse(releasesOutput).pods;
   const pod = pods[0];
 
-  return pods.length === 1 && parseInt(pod.version) === release && pod.status === "Healthy";
+  return pods.length === 1 && Number(pod.version) === release && pod.status === "Healthy";
 }
 
 async function waitForNewRelease(oldRelease, app, multiplier) {
@@ -64,7 +64,7 @@ async function getCurrentRelease(app) {
     await exec.exec(`gigalixir releases -a ${app}`, [], options);
   });
 
-  const currentRelease = parseInt(JSON.parse(releasesOutput)[0].version);
+  const currentRelease = Number(JSON.parse(releasesOutput)[0].version);
 
   return currentRelease;
 }
