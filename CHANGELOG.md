@@ -3,6 +3,7 @@
 ## v0.4.0
 
 - Fixed an issue where the action would get stuck at 'Getting current replicas' for apps requesting more than one replica
+- Does a health check every 10 seconds instead of increasing the wait time exponentially. Times out now after 10 minutes.
 
 ## v0.3.0
 
