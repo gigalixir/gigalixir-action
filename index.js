@@ -4,7 +4,7 @@ const path = require('path');
 
 function wait(seconds) {
   return new Promise(resolve => {
-    if (typeof (seconds) !== 'number') {
+    if ((typeof seconds) !== 'number') {
       throw new Error('seconds not a number');
     }
 
@@ -64,33 +64,27 @@ async function getCurrentRelease(app) {
   });
 
   const releases = JSON.parse(releasesOutput);
-  // first release number in gigalixir is 1
-  const currentRelease = releases.length && Number(releases[0].version) || 0;
+  const currentRelease = releases.length ? Number(releases[0].version) : 0;
 
   return currentRelease;
 }
 
-function printRelease(releaseNumber) {
-  return releaseNumber || "[NO PREV RELEASE]"
+function formatReleaseMessage(releaseNumber) {
+  return releaseNumber ?
+    `The current release is ${releaseNumber}` :
+    "This is the first release";
 }
 
 async function run() {
   try {
-    const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', {
+    const baseInputOptions = {
       required: true
-    });
-    const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', {
-      required: true
-    });
-    const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', {
-      required: true
-    });
-    const gigalixirApp = core.getInput('GIGALIXIR_APP', {
-      required: true
-    });
-    const migrations = core.getInput('MIGRATIONS', {
-      required: true
-    });
+    };
+    const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', baseInputOptions);
+    const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', baseInputOptions);
+    const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', baseInputOptions);
+    const gigalixirApp = core.getInput('GIGALIXIR_APP', baseInputOptions);
+    const migrations = core.getInput('MIGRATIONS', baseInputOptions);
 
     await core.group("Installing gigalixir", async () => {
       await exec.exec('sudo pip install gigalixir --ignore-installed six')
@@ -107,7 +101,8 @@ async function run() {
     const currentRelease = await core.group("Getting current release", async () => {
       return await getCurrentRelease(gigalixirApp);
     });
-    core.info(`The current release is ${printRelease(currentRelease)}`);
+
+    core.info(formatReleaseMessage(currentRelease));
 
     await core.group("Deploying to gigalixir", async () => {
       await exec.exec("git push -f gigalixir HEAD:refs/heads/master");
@@ -127,10 +122,14 @@ async function run() {
           await exec.exec(`gigalixir ps:migrate -a ${gigalixirApp}`)
         });
       } catch (error) {
-        core.warning(`Migration failed, rolling back to the previous release: ${printRelease(currentRelease)}`);
-        await core.group("Rolling back", async () => {
-          await exec.exec(`gigalixir releases:rollback -a ${gigalixirApp}`)
-        });
+        if (currentRelease === 0) {
+          core.warning("Migration failed");
+        } else {
+          core.warning(`Migration failed, rolling back to the previous release: ${currentRelease}`);
+          await core.group("Rolling back", async () => {
+            await exec.exec(`gigalixir releases:rollback -a ${gigalixirApp}`)
+          });
+        }
 
         core.setFailed(error.message);
       }

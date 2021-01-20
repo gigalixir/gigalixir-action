@@ -1,7 +1,7 @@
 # Changelog
 
 ## v0.4.1
-- Fixed an issue when deploying an app to gigalixir for the first time ever through the CI
+- Deployment works if the action is making the very first deployment.
 ## v0.4.0
 
 - Fixed an issue where the action would get stuck at 'Getting current replicas' for apps requesting more than one replica
