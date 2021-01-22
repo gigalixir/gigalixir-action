@@ -12,7 +12,7 @@ test:
 
 deploy:
   needs: test # Will only run if the test job succeeds
-  if: github.ref == 'refs/heads/master' # Only run this job if it is on the master branch
+  if: github.ref == 'refs/heads/main' # Only run this job if it is on the main branch
 
   runs-on: ubuntu-latest
 
