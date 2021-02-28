@@ -21,7 +21,11 @@ deploy:
       with:
         ref: master # Checkout out master instead of the latest commit
         fetch-depth: 0 # Checkout the whole branch
-
+        
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.8.1
+        
     - uses: mhanberg/gigalixir-action@<current release>
       with:
         GIGALIXIR_USERNAME: ${{ secrets.GIGALIXIR_USERNAME }}
