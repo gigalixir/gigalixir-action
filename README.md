@@ -19,7 +19,7 @@ deploy:
   steps:
     - uses: actions/checkout@v2
       with:
-        ref: master # Checkout out master instead of the latest commit
+        ref: main # Check out main instead of the latest commit
         fetch-depth: 0 # Checkout the whole branch
         
     - uses: actions/setup-python@v2
