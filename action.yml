@@ -17,6 +17,9 @@ inputs:
     description: 'Configuration for migrations'
     required: true
     default: true
+  APP_SUBFOLDER:
+    description: 'Subfolder of your app'
+    required: false
 
 runs:
   using: 'node12'
