@@ -1093,6 +1093,7 @@ async function run() {
     const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', baseInputOptions);
     const gigalixirApp = core.getInput('GIGALIXIR_APP', baseInputOptions);
     const migrations = core.getInput('MIGRATIONS', baseInputOptions);
+    const appSubfolder = core.getInput('APP_SUBFOLDER', { required: false });
 
     await core.group("Installing gigalixir", async () => {
       await exec.exec('pip3 install gigalixir')
@@ -1113,7 +1114,11 @@ async function run() {
     core.info(formatReleaseMessage(currentRelease));
 
     await core.group("Deploying to gigalixir", async () => {
-      await exec.exec("git push -f gigalixir HEAD:refs/heads/master");
+      if (appSubfolder) {
+        await exec.exec(`git subtree push --prefix ${appSubfolder} gigalixir master`);
+      } else {
+        await exec.exec("git push -f gigalixir HEAD:refs/heads/master");
+      }
     });
 
     if (migrations === "true") {

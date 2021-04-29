@@ -33,6 +33,7 @@ deploy:
         GIGALIXIR_APP: my-gigalixir-app # Feel free to also put this in your secrets
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         MIGRATIONS: false  # defaults to true
+        APP_SUBFOLDER: my-app-subfolder  # Add only if you want to deploy an app that is not at the root of your repository
 ```
 
 ## Migrations
