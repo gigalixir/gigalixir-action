@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.0
+
+- Add subfolder support - [#34](https://github.com/mhanberg/gigalixir-action/pull/34) by [Christian Tovar](https://github.com/ChristianTovar)
+
 ## v0.4.3
 
 - Fix broken build
