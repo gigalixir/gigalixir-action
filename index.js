@@ -93,7 +93,7 @@ async function run() {
     const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', requiredInputOptions);
     const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', requiredInputOptions);
     const migrations = core.getInput('MIGRATIONS', requiredInputOptions);
-    const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', requiredInputOptions);
+    const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', { required: migrations });
 
     await core.group("Installing gigalixir", async () => {
       await exec.exec('pip3 install gigalixir')

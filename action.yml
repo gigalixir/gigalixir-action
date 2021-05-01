@@ -23,7 +23,7 @@ inputs:
     default: true
   SSH_PRIVATE_KEY:
     description: 'Your ssh private key that is paired with a public key that is uploaded to Gigalixir'
-    required: true
+    required: ${MIGRATIONS}
 
 runs:
   using: 'node12'
