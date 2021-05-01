@@ -75,17 +75,25 @@ function formatReleaseMessage(releaseNumber) {
     "This is the first release";
 }
 
+function addExtraFlagCleanCache(gigalixirClean) {
+  return gigalixirClean ? ` -c http.extraheader="GIGALIXIR-CLEAN: true" ` : ""
+}
+
 async function run() {
   try {
-    const baseInputOptions = {
+    const requiredInputOptions = {
       required: true
     };
-    const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', baseInputOptions);
-    const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', baseInputOptions);
-    const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', baseInputOptions);
-    const gigalixirApp = core.getInput('GIGALIXIR_APP', baseInputOptions);
-    const migrations = core.getInput('MIGRATIONS', baseInputOptions);
-    const appSubfolder = core.getInput('APP_SUBFOLDER', { required: false });
+    const optionalInputOptions = {
+      required: false
+    };
+    const appSubfolder = core.getInput('APP_SUBFOLDER', optionalInputOptions);
+    const gigalixirApp = core.getInput('GIGALIXIR_APP', requiredInputOptions);
+    const gigalixirClean = core.getInput('GIGALIXIR_CLEAN', optionalInputOptions);
+    const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', requiredInputOptions);
+    const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', requiredInputOptions);
+    const migrations = core.getInput('MIGRATIONS', requiredInputOptions);
+    const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', requiredInputOptions);
 
     await core.group("Installing gigalixir", async () => {
       await exec.exec('pip3 install gigalixir')
@@ -107,9 +115,9 @@ async function run() {
 
     await core.group("Deploying to gigalixir", async () => {
       if (appSubfolder) {
-        await exec.exec(`git subtree push --prefix ${appSubfolder} gigalixir master`);
+        await exec.exec(`git ${addExtraFlagCleanCache(gigalixirClean)} subtree push --prefix ${appSubfolder} gigalixir master`);
       } else {
-        await exec.exec("git push -f gigalixir HEAD:refs/heads/master");
+        await exec.exec(`git ${addExtraFlagCleanCache(gigalixirClean)} push -f gigalixir HEAD:refs/heads/master`);
       }
     });
 
