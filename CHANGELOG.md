@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.6.0
+
+- Add option to clean build cache -[#35](https://github.com/mhanberg/gigalixir-action/pull/35) by [Raul Pereira](https://github.com/raulpe7eira)
+- Only require SSH key if you have migratinos configured -[#35](https://github.com/mhanberg/gigalixir-action/pull/35) by [Raul Pereira](https://github.com/raulpe7eira)
+
 ## v0.5.0
 
 - Add subfolder support - [#34](https://github.com/mhanberg/gigalixir-action/pull/34) by [Christian Tovar](https://github.com/ChristianTovar)
