@@ -81,19 +81,13 @@ function addExtraFlagCleanCache(gigalixirClean) {
 
 async function run() {
   try {
-    const requiredInputOptions = {
-      required: true
-    };
-    const optionalInputOptions = {
-      required: false
-    };
-    const appSubfolder = core.getInput('APP_SUBFOLDER', optionalInputOptions);
-    const gigalixirApp = core.getInput('GIGALIXIR_APP', requiredInputOptions);
-    const gigalixirClean = core.getInput('GIGALIXIR_CLEAN', optionalInputOptions);
-    const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', requiredInputOptions);
-    const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', requiredInputOptions);
-    const migrations = core.getInput('MIGRATIONS', requiredInputOptions);
-    const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', { required: migrations });
+    const appSubfolder = core.getInput('APP_SUBFOLDER', {required: false});
+    const gigalixirApp = core.getInput('GIGALIXIR_APP', {required: true});
+    const gigalixirClean = core.getInput('GIGALIXIR_CLEAN', {required: false});
+    const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', {required: true});
+    const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', {required: true});
+    const migrations = core.getInput('MIGRATIONS', {required: true});
+    const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', {required: JSON.parse(migrations)});
 
     await core.group("Installing gigalixir", async () => {
       await exec.exec('pip3 install gigalixir')
