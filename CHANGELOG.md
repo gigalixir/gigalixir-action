@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.6.1
+
+- Coerce stringified boolean to an actual book [#38](https://github.com/mhanberg/gigalixir-action/pull/38) by [Mitch Hanberg](https://github.com/mhanberg)
+
 ## v0.6.0
 
 - Add option to clean build cache -[#35](https://github.com/mhanberg/gigalixir-action/pull/35) by [Raul Pereira](https://github.com/raulpe7eira)
