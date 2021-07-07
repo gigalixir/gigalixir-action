@@ -1,8 +1,13 @@
 # Changelog
 
+## v0.6.2
+
+- Handle boolean string again as to not always use GIGALIXIR_CLEAN header [#41](https://github.com/mhanberg/gigalixir-action/pull/41) by [Ian Young](https://github.com/iangreenleaf)
+
+
 ## v0.6.1
 
-- Coerce stringified boolean to an actual book [#38](https://github.com/mhanberg/gigalixir-action/pull/38) by [Mitch Hanberg](https://github.com/mhanberg)
+- Coerce stringified boolean to an actual bool [#38](https://github.com/mhanberg/gigalixir-action/pull/38) by [Mitch Hanberg](https://github.com/mhanberg)
 
 ## v0.6.0
 
