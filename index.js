@@ -76,7 +76,7 @@ function formatReleaseMessage(releaseNumber) {
 }
 
 function addExtraFlagCleanCache(gigalixirClean) {
-  return gigalixirClean ? ` -c http.extraheader="GIGALIXIR-CLEAN: true" ` : ""
+  return (gigalixirClean === "true") ? ` -c http.extraheader="GIGALIXIR-CLEAN: true" ` : ""
 }
 
 async function run() {
