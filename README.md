@@ -7,7 +7,7 @@ Note: This action has only been tested in one repo and has no unit tests.
 ## Usage
 
 ```yaml
-test: 
+test:
   # A job to run your tests, linters, etc
 
 deploy:
@@ -21,11 +21,11 @@ deploy:
       with:
         ref: main # Check out main instead of the latest commit
         fetch-depth: 0 # Checkout the whole branch
-        
+
     - uses: actions/setup-python@v2
       with:
         python-version: 3.8.1
-        
+
     - uses: mhanberg/gigalixir-action@<current release>
       with:
         APP_SUBFOLDER: my-app-subfolder  # Add only if you want to deploy an app that is not at the root of your repository
@@ -39,9 +39,17 @@ deploy:
 
 ## Migrations
 
-Currently running migrations is only supported when your app is deployed as a mix release.
+If your application runs as an Elixir release and `MIGRATIONS: true` (per the
+above config), your migration command will be `gigalixir ps:migrate`, which is
+set as the default.
 
-The migrations are run with the `gigalixir ps:migrate` command, which requires having a public key uploaded to your app's container and a private key locally to connect via an `ssh` connection.
+This requires that you have a public key uploaded to the
+app's container and a private key supplied as `SSH_PRIVATE_KEY` in the secrets
+above, as well as your username and password.
+
+If your application uses some other command to migrate -- `gigalixir run mix
+ecto.migrate` because it runs in Mix-mode, you can set `MIGRATION_COMMAND: run
+mix ecto.migrate`. It has the same requirements.
 
 Please see the docs for [How to Run Migrations](https://gigalixir.readthedocs.io/en/latest/main.html#migrations) for more information.
 
@@ -49,7 +57,7 @@ If your migrations fail, the action will rollback the app to the last version.
 
 ## Contributing
 
-Remember to 
+Remember to
 
 - `npm install`
 - `npm run package`

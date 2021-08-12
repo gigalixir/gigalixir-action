@@ -1096,6 +1096,10 @@ async function run() {
     const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', {required: true});
     const migrations = core.getInput('MIGRATIONS', {required: true});
     const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', {required: JSON.parse(migrations)});
+    // values would be "ps.migrate" (distillery or release mode) or "run mix
+    // ecto.migrate" (mix mode). This also allows for very custom values (say,
+    // if you're running multiple databases, or an umbrella app).
+    const migrationCommand = core.getInput('MIGRATION_COMMAND', {required: false}) || `ps:migrate`;
 
     await core.group("Installing gigalixir", async () => {
       await exec.exec('pip3 install gigalixir')
@@ -1134,7 +1138,7 @@ async function run() {
 
       try {
         await core.group("Running migrations", async () => {
-          await exec.exec(`gigalixir ps:migrate -a ${gigalixirApp}`)
+          await exec.exec(`gigalixir ${migrationCommand} -a ${gigalixirApp}`)
         });
       } catch (error) {
         if (currentRelease === 0) {
