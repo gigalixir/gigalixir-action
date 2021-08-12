@@ -41,8 +41,8 @@ deploy:
 ## Migrations
 
 If your application runs as an Elixir release and `MIGRATIONS: true` (per the
-above config), your migration command will be `gigalixir ps:migrate`, which is
-set as the default.
+above config), your migration command will be `gigalixir ps:migrate -a
+my-cool-app`, which is set as the default.
 
 This requires that you have a public key uploaded to the
 app's container and a private key supplied as `SSH_PRIVATE_KEY` in the secrets
@@ -50,7 +50,8 @@ above, as well as your username and password.
 
 If your application uses some other command to migrate -- `gigalixir run mix
 ecto.migrate` because it runs in Mix-mode, you can set `MIGRATION_COMMAND: run
-mix ecto.migrate`. It has the same requirements.
+mix ecto.migrate`. It has the same requirements. `gigalixir` is prepended and
+`-a my-cool-app` is appended to whatever you provide.
 
 Please see the docs for [How to Run Migrations](https://gigalixir.readthedocs.io/en/latest/main.html#migrations) for more information.
 
