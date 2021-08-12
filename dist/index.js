@@ -1096,7 +1096,7 @@ async function run() {
     const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', {required: true});
     const migrations = core.getInput('MIGRATIONS', {required: true});
     const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', {required: JSON.parse(migrations)});
-    // values would be "ps.migrate" (distillery or release mode) or "run mix
+    // values would be "ps.migrate" (distillery or release mode) or "ps:run mix
     // ecto.migrate" (mix mode). This also allows for very custom values (say,
     // if you're running multiple databases, or an umbrella app).
     const migrationCommand = core.getInput('MIGRATION_COMMAND', {required: false}) || `ps:migrate`;
