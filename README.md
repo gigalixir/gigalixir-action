@@ -35,7 +35,7 @@ deploy:
         GIGALIXIR_PASSWORD: ${{ secrets.GIGALIXIR_PASSWORD }}
         MIGRATIONS: false  # defaults to true
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        MIGRATION_COMMAND: ${{secrets.MIGRATION_COMMAND}} # defaults to 'ps.migrate' but could also be 'run mix ecto.migrate'
+        MIGRATION_COMMAND: ps.migrate # defaults to 'ps.migrate' but could also be 'run mix ecto.migrate'. Add it to secrets if you like.
 ```
 
 ## Migrations
