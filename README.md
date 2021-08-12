@@ -35,7 +35,7 @@ deploy:
         GIGALIXIR_PASSWORD: ${{ secrets.GIGALIXIR_PASSWORD }}
         MIGRATIONS: false  # defaults to true
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        MIGRATION_COMMAND: ps.migrate # defaults to 'ps.migrate' but could also be 'run mix ecto.migrate'. Add it to secrets if you like.
+        MIGRATION_COMMAND: ps.migrate # defaults to 'ps.migrate' but could also be 'ps:run mix ecto.migrate'. Add it to secrets if you like.
 ```
 
 ## Migrations
@@ -48,10 +48,14 @@ This requires that you have a public key uploaded to the
 app's container and a private key supplied as `SSH_PRIVATE_KEY` in the secrets
 above, as well as your username and password.
 
-If your application uses some other command to migrate -- `gigalixir run mix
+If your application uses some other command to migrate -- `gigalixir ps:run mix
 ecto.migrate` because it runs in Mix-mode, you can set `MIGRATION_COMMAND: run
 mix ecto.migrate`. It has the same requirements. `gigalixir` is prepended and
 `-a my-cool-app` is appended to whatever you provide.
+
+Using `ps:run mix ecto.migrate` instead of `run mix ecto.migrate` will force
+gigalixir to run the command in the current container rather than a new
+container and will raise an error if the migration fails.
 
 Please see the docs for [How to Run Migrations](https://gigalixir.readthedocs.io/en/latest/main.html#migrations) for more information.
 
