@@ -2,8 +2,6 @@
 
 This action will deploy your elixir application to Gigalixir and will run your migrations automatically.
 
-Note: This action has only been tested in one repo and has no unit tests.
-
 ## Usage
 
 ```yaml
