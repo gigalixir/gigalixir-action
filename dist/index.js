@@ -1093,7 +1093,8 @@ async function run() {
     const gigalixirApp = core.getInput('GIGALIXIR_APP', {required: true});
     const gigalixirClean = core.getInput('GIGALIXIR_CLEAN', {required: false});
     const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', {required: true});
-    const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', {required: true});
+    const gigalixirApiKey = core.getInput('GIGALIXIR_API_KEY', {required: false});
+    const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', {required: false});
     const migrations = core.getInput('MIGRATIONS', {required: true});
     const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', {required: JSON.parse(migrations)});
 
@@ -1101,9 +1102,15 @@ async function run() {
       await exec.exec('pip3 install gigalixir')
     });
 
-    await core.group("Logging in to gigalixir", async () => {
-      await exec.exec(`gigalixir login -e "${gigalixirUsername}" -y -p "${gigalixirPassword}"`)
-    });
+    if (gigalixirPassword) {
+      await core.group("Logging in to gigalixir", async () => {
+        await exec.exec(`gigalixir login -e "${gigalixirUsername}" -y -p "${gigalixirPassword}"`)
+      });
+    } else if (gigalixirApiKey) {
+      await core.group("Setting up ~/.netrc", async () => {
+        await exec.exec(path.join(__dirname, "../bin/add-gigalixir-api-key"), [gigalixirUsername, gigalixirApiKey]);
+      });
+    }
 
     await core.group("Setting git remote for gigalixir", async () => {
       await exec.exec(`gigalixir git:remote ${gigalixirApp}`);
