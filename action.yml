@@ -14,9 +14,12 @@ inputs:
   GIGALIXIR_USERNAME:
     description: 'Your Gigalixir username'
     required: true
+  GIGALIXIR_API_KEY:
+    description: 'Your Gigalixir API key -- either this option or GIGALIXIR_PASSWORD should be used'
+    required: false
   GIGALIXIR_PASSWORD:
-    description: 'Your Gigalixir password'
-    required: true
+    description: 'Your Gigalixir password -- either this option or GIGALIXIR_API_KEY should be used'
+    required: false
   MIGRATIONS:
     description: 'Configuration for migrations'
     required: true

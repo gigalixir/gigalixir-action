@@ -1,0 +1,19 @@
+#! /usr/bin/env bash
+
+set -ev
+
+NETRC="$HOME/.netrc"
+
+touch $NETRC
+
+printf "machine api.gigalixir.com\n" >> $NETRC
+printf "login %s\n" "$1" >> $NETRC
+printf "password %s\n" "$2" >> $NETRC
+
+printf "\n">> $NETRC
+
+printf "machine git.gigalixir.com\n" >> $NETRC
+printf "login %s\n" "$1" >> $NETRC
+printf "password %s\n" "$2" >> $NETRC
+
+chmod 644 $NETRC
