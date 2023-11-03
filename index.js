@@ -122,7 +122,7 @@ async function run() {
 
       const newRelease = await getCurrentRelease(gigalixirApp);
 
-      await core.group(`Waiting for new release ${newRelease} to deploy`, async () => {
+      await core.group(`Waiting for new release to deploy: ${newRelease}`, async () => {
         await waitForNewRelease(currentRelease, newRelease, gigalixirApp, 1);
       });
 
