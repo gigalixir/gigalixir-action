@@ -121,6 +121,7 @@ async function run() {
       });
 
       const newRelease = await getCurrentRelease(gigalixirApp);
+      core.info("I AM TEH NEW RELEASE: " + newRelease)
 
       await core.group(`Waiting for new release to deploy: ${newRelease}`, async () => {
         await waitForNewRelease(currentRelease, newRelease, gigalixirApp, 1);
