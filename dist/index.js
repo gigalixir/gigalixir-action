@@ -1049,7 +1049,7 @@ async function waitForNewRelease(oldRelease, newRelease, app, attempts, maxAttem
   } else {
     if (attempts <= maxAttempts) {
       await wait(10);
-      await waitForNewRelease(oldRelease, newRelease, app, attempts + 1);
+      await waitForNewRelease(oldRelease, newRelease, app, attempts + 1, maxAttempts);
     } else {
       throw "Taking too long for new release to deploy";
     }
