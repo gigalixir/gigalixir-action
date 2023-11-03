@@ -35,9 +35,7 @@ async function isNextReleaseHealthy(release, app) {
   return releases.pods.filter((pod) => (Number(pod.version) === release && pod.status === "Healthy")).length >= releases.replicas_desired;
 }
 
-async function waitForNewRelease(oldRelease, newRelease, app, attempts) {
-  const maxAttempts = 10;
-
+async function waitForNewRelease(oldRelease, newRelease, app, attempts, maxAttempts) {
   if (await isNextReleaseHealthy(newRelease, app)) {
     return await Promise.resolve(true);
   } else {
@@ -88,6 +86,7 @@ async function run() {
     const gigalixirClean = core.getInput('GIGALIXIR_CLEAN', {required: false});
     const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', {required: true});
     const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', {required: true});
+    const maxRetryAttempts = Number(core.getInput('MAX_RETRY_ATTEMPTS', {required: false}));
     const migrations = core.getInput('MIGRATIONS', {required: true});
     const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', {required: JSON.parse(migrations)});
 
@@ -123,10 +122,9 @@ async function run() {
       });
 
       const newRelease = await getCurrentRelease(gigalixirApp);
-      core.info("I AM TEH NEW RELEASE: " + newRelease)
 
       await core.group(`Waiting for new release to deploy: ${newRelease}`, async () => {
-        await waitForNewRelease(currentRelease, newRelease, gigalixirApp, 1);
+        await waitForNewRelease(currentRelease, newRelease, gigalixirApp, 1, maxRetryAttempts);
       });
 
       try {
