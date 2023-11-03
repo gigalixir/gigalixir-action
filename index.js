@@ -34,7 +34,7 @@ async function isNextReleaseHealthy(release, app) {
 }
 
 async function waitForNewRelease(oldRelease, newRelease, app, attempts) {
-  const maxAttempts = 60;
+  const maxAttempts = 10;
 
   if (await isNextReleaseHealthy(newRelease, app)) {
     return await Promise.resolve(true);
@@ -120,8 +120,9 @@ async function run() {
         await exec.exec(path.join(__dirname, "../bin/add-private-key"), [sshPrivateKey]);
       });
 
-      await core.group("Waiting for new release to deploy", async () => {
-        const newRelease = await getCurrentRelease(gigalixirApp);
+      const newRelease = await getCurrentRelease(gigalixirApp);
+
+      await core.group(`Waiting for new release ${newRelease} to deploy`, async () => {
         await waitForNewRelease(currentRelease, newRelease, gigalixirApp, 1);
       });
 
