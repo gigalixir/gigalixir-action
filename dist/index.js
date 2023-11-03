@@ -1038,18 +1038,20 @@ async function isNextReleaseHealthy(release, app) {
   });
 
   const releases = JSON.parse(releasesOutput);
+  // TODO: add condition to allow detecting for new push from other branch that ran faster than this job
+  // Might be easy to break if pod.version becomes < release but does this guarantee that the migration was ran?
   return releases.pods.filter((pod) => (Number(pod.version) === release && pod.status === "Healthy")).length >= releases.replicas_desired;
 }
 
-async function waitForNewRelease(oldRelease, app, attempts) {
-  const maxAttempts = 60;
+async function waitForNewRelease(oldRelease, newRelease, app, attempts) {
+  const maxAttempts = 10;
 
-  if (await isNextReleaseHealthy(oldRelease + 1, app)) {
+  if (await isNextReleaseHealthy(newRelease, app)) {
     return await Promise.resolve(true);
   } else {
     if (attempts <= maxAttempts) {
       await wait(10);
-      await waitForNewRelease(oldRelease, app, attempts + 1);
+      await waitForNewRelease(oldRelease, newRelease, app, attempts + 1);
     } else {
       throw "Taking too long for new release to deploy";
     }
@@ -1128,8 +1130,11 @@ async function run() {
         await exec.exec(path.join(__dirname, "../bin/add-private-key"), [sshPrivateKey]);
       });
 
-      await core.group("Waiting for new release to deploy", async () => {
-        await waitForNewRelease(currentRelease, gigalixirApp, 1);
+      const newRelease = await getCurrentRelease(gigalixirApp);
+      core.info("I AM TEH NEW RELEASE: " + newRelease)
+
+      await core.group(`Waiting for new release to deploy: ${newRelease}`, async () => {
+        await waitForNewRelease(currentRelease, newRelease, gigalixirApp, 1);
       });
 
       try {
