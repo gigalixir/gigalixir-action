@@ -7,7 +7,7 @@ Note: This action has only been tested in one repo and has no unit tests.
 ## Usage
 
 ```yaml
-test: 
+test:
   # A job to run your tests, linters, etc
 
 deploy:
@@ -21,11 +21,11 @@ deploy:
       with:
         ref: main # Check out main instead of the latest commit
         fetch-depth: 0 # Checkout the whole branch
-        
+
     - uses: actions/setup-python@v2
       with:
         python-version: 3.8.1
-        
+
     - uses: mhanberg/gigalixir-action@<current release>
       with:
         APP_SUBFOLDER: my-app-subfolder  # Add only if you want to deploy an app that is not at the root of your repository
@@ -33,6 +33,7 @@ deploy:
         GIGALIXIR_CLEAN: true # defaults to false
         GIGALIXIR_USERNAME: ${{ secrets.GIGALIXIR_USERNAME }}
         GIGALIXIR_PASSWORD: ${{ secrets.GIGALIXIR_PASSWORD }}
+        MAX_RETRY_ATTEMPTS: 10 # Max number of times to retry Gigalixir API calls. Retries happen every 10 seconds. The default is 60
         MIGRATIONS: false  # defaults to true
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 ```
@@ -49,7 +50,7 @@ If your migrations fail, the action will rollback the app to the last version.
 
 ## Contributing
 
-Remember to 
+Remember to
 
 - `npm install`
 - `npm run package`
