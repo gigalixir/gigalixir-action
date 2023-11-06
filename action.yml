@@ -17,6 +17,9 @@ inputs:
   GIGALIXIR_PASSWORD:
     description: 'Your Gigalixir password'
     required: true
+  MAX_RETRY_ATTEMPTS:
+    description: 'Maximum number of request retry attempts when communicating with Gigalixir'
+    default: "60"
   MIGRATIONS:
     description: 'Configuration for migrations'
     required: true
@@ -26,5 +29,5 @@ inputs:
     required: ${MIGRATIONS}
 
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'

@@ -1041,15 +1041,13 @@ async function isNextReleaseHealthy(release, app) {
   return releases.pods.filter((pod) => (Number(pod.version) === release && pod.status === "Healthy")).length >= releases.replicas_desired;
 }
 
-async function waitForNewRelease(oldRelease, app, attempts) {
-  const maxAttempts = 60;
-
-  if (await isNextReleaseHealthy(oldRelease + 1, app)) {
+async function waitForNewRelease(oldRelease, newRelease, app, attempts, maxAttempts) {
+  if (await isNextReleaseHealthy(newRelease, app)) {
     return await Promise.resolve(true);
   } else {
     if (attempts <= maxAttempts) {
       await wait(10);
-      await waitForNewRelease(oldRelease, app, attempts + 1);
+      await waitForNewRelease(oldRelease, newRelease, app, attempts + 1, maxAttempts);
     } else {
       throw "Taking too long for new release to deploy";
     }
@@ -1094,6 +1092,7 @@ async function run() {
     const gigalixirClean = core.getInput('GIGALIXIR_CLEAN', {required: false});
     const gigalixirUsername = core.getInput('GIGALIXIR_USERNAME', {required: true});
     const gigalixirPassword = core.getInput('GIGALIXIR_PASSWORD', {required: true});
+    const maxRetryAttempts = Number(core.getInput('MAX_RETRY_ATTEMPTS', {required: false}));
     const migrations = core.getInput('MIGRATIONS', {required: true});
     const sshPrivateKey = core.getInput('SSH_PRIVATE_KEY', {required: JSON.parse(migrations)});
 
@@ -1128,8 +1127,10 @@ async function run() {
         await exec.exec(path.join(__dirname, "../bin/add-private-key"), [sshPrivateKey]);
       });
 
-      await core.group("Waiting for new release to deploy", async () => {
-        await waitForNewRelease(currentRelease, gigalixirApp, 1);
+      const newRelease = await getCurrentRelease(gigalixirApp);
+
+      await core.group(`Waiting for new release to deploy: ${newRelease}`, async () => {
+        await waitForNewRelease(currentRelease, newRelease, gigalixirApp, 1, maxRetryAttempts);
       });
 
       try {
