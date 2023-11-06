@@ -1038,8 +1038,6 @@ async function isNextReleaseHealthy(release, app) {
   });
 
   const releases = JSON.parse(releasesOutput);
-  // TODO: add condition to allow detecting for new push from other branch that ran faster than this job
-  // Might be easy to break if pod.version becomes < release but does this guarantee that the migration was ran?
   return releases.pods.filter((pod) => (Number(pod.version) === release && pod.status === "Healthy")).length >= releases.replicas_desired;
 }
 
