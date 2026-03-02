@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Update major and minor version tags
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+
+          # Extract major version (v1 from v1.2.3)
+          MAJOR=$(echo $VERSION | grep -oE '^v[0-9]+')
+
+          # Extract minor version (v1.2 from v1.2.3)
+          MINOR=$(echo $VERSION | grep -oE '^v[0-9]+\.[0-9]+')
+
+          echo "Version: $VERSION"
+          echo "Major: $MAJOR"
+          echo "Minor: $MINOR"
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Update major version tag
+          if [ -n "$MAJOR" ]; then
+            git tag -fa "$MAJOR" -m "Update $MAJOR tag to $VERSION"
+            git push origin "$MAJOR" --force
+            echo "Updated $MAJOR tag"
+          fi
+
+          # Update minor version tag
+          if [ -n "$MINOR" ]; then
+            git tag -fa "$MINOR" -m "Update $MINOR tag to $VERSION"
+            git push origin "$MINOR" --force
+            echo "Updated $MINOR tag"
+          fi

@@ -1,0 +1,36 @@
+# Deploy an app from a subdirectory in a monorepo
+# Uses git subtree push to deploy only the specified subfolder
+#
+# Example monorepo structure:
+#   my-monorepo/
+#   ├── apps/
+#   │   ├── web/          <-- Elixir/Phoenix app to deploy
+#   │   └── admin/
+#   ├── packages/
+#   └── ...
+#
+# Required secrets:
+#   - GIGALIXIR_EMAIL: Your Gigalixir account email
+#   - GIGALIXIR_API_KEY: Your Gigalixir API key
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: gigalixir/gigalixir-action@v1
+        with:
+          gigalixir_email: ${{ secrets.GIGALIXIR_EMAIL }}
+          gigalixir_api_key: ${{ secrets.GIGALIXIR_API_KEY }}
+          app_name: my-app
+          app_subfolder: apps/web

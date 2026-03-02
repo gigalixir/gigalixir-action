@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build output - NOTE: dist/ should be committed for GitHub Actions
+# dist/
+
+# Coverage
+coverage/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials (should never be committed)
+.git-credentials
+.netrc
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Typescript cache
+*.tsbuildinfo

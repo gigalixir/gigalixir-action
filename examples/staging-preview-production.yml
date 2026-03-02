@@ -1,0 +1,107 @@
+# Staging, Preview, and Production deployment workflow
+# - Push to develop → deploys to staging
+# - Pull request → deploys to preview environment
+# - Push to main → deploys to production (requires approval)
+#
+# Required secrets (configure per environment in GitHub):
+#   Staging environment:
+#     - GIGALIXIR_EMAIL
+#     - GIGALIXIR_API_KEY
+#   Preview environment:
+#     - GIGALIXIR_EMAIL
+#     - GIGALIXIR_API_KEY
+#   Production environment:
+#     - GIGALIXIR_EMAIL
+#     - GIGALIXIR_API_KEY
+#
+# Note: This example uses a single shared preview app. For true PR-based
+# preview environments, you would need to dynamically create/destroy
+# Gigalixir apps using the Gigalixir CLI.
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+# Prevent concurrent deployments to the same environment
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Deploy to staging on push to develop
+  deploy-staging:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://my-app-staging.gigalixirapp.com
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Deploy to Staging
+        uses: gigalixir/gigalixir-action@v1
+        with:
+          gigalixir_email: ${{ secrets.GIGALIXIR_EMAIL }}
+          gigalixir_api_key: ${{ secrets.GIGALIXIR_API_KEY }}
+          app_name: my-app-staging
+
+  # Deploy to preview on pull request
+  deploy-preview:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+      url: https://my-app-preview.gigalixirapp.com
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          # For PRs, checkout the PR head
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Deploy to Preview
+        uses: gigalixir/gigalixir-action@v1
+        with:
+          gigalixir_email: ${{ secrets.GIGALIXIR_EMAIL }}
+          gigalixir_api_key: ${{ secrets.GIGALIXIR_API_KEY }}
+          app_name: my-app-preview
+
+      - name: Comment PR with preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚀 Preview deployed to https://my-app-preview.gigalixirapp.com'
+            })
+
+  # Deploy to production on push to main
+  deploy-production:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://my-app.gigalixirapp.com
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Deploy to Production
+        uses: gigalixir/gigalixir-action@v1
+        with:
+          gigalixir_email: ${{ secrets.GIGALIXIR_EMAIL }}
+          gigalixir_api_key: ${{ secrets.GIGALIXIR_API_KEY }}
+          app_name: my-app-prod

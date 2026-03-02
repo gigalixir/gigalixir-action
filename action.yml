@@ -1,0 +1,130 @@
+name: 'Gigalixir Deploy'
+description: 'Deploy your application to Gigalixir'
+author: 'Gigalixir'
+
+branding:
+  icon: 'upload-cloud'
+  color: 'purple'
+
+inputs:
+  gigalixir_email:
+    description: 'Your Gigalixir account email'
+    required: false
+    default: ''
+  gigalixir_api_key:
+    description: 'Your Gigalixir API key'
+    required: false
+    default: ''
+  app_name:
+    description: 'The name of your Gigalixir app'
+    required: false
+    default: ''
+  action:
+    description: 'Action to perform: deploy, create, destroy, create_deploy, or scale'
+    required: false
+    default: 'deploy'
+  git_ref:
+    description: 'The git ref to deploy (commit SHA, branch, or tag)'
+    required: false
+    default: ''
+  cloud:
+    description: 'Cloud provider for new apps (gcp or aws)'
+    required: false
+    default: ''
+  region:
+    description: 'Region for new apps (e.g., us-east-1, us-central1)'
+    required: false
+    default: ''
+  stack:
+    description: 'Stack for new apps (e.g., gigalixir-20)'
+    required: false
+    default: ''
+  database_size:
+    description: 'Database size to create (free, 0.6, 1.7, 4, 8, 16, 32, 48, 64, 96). Use "free" for free tier.'
+    required: false
+    default: ''
+  database_version:
+    description: 'PostgreSQL major version (e.g., 16, 15, 14)'
+    required: false
+    default: ''
+  copy_config_from:
+    description: 'App name to copy environment config from (useful for preview environments)'
+    required: false
+    default: ''
+  github_deployments:
+    description: 'Create GitHub Deployment records for tracking. Requires repo write access. Not available for private repos on GitHub Free plan.'
+    required: false
+    default: 'false'
+  github_environment:
+    description: 'GitHub Environment name for deployment tracking (e.g., production, staging, pr-123). Only used when github_deployments is true.'
+    required: false
+    default: ''
+  app_subfolder:
+    description: 'Subfolder containing the app to deploy (for monorepo/subtree deployments). When set, uses git subtree push instead of git push.'
+    required: false
+    default: ''
+  clean_build_cache:
+    description: 'Clear the build cache on Gigalixir before building. Useful when builds are broken due to stale cache.'
+    required: false
+    default: 'false'
+  deploy_timeout:
+    description: 'Max seconds to wait for deployment rollout to complete. Set to 0 to skip verification.'
+    required: false
+    default: '0'
+  replicas:
+    description: 'Number of replicas to run (used with action: scale)'
+    required: false
+    default: ''
+  size:
+    description: 'Size of each replica between 0.5 and 128 (used with action: scale)'
+    required: false
+    default: ''
+  # Backwards-compatible aliases from gigalixir-action
+  GIGALIXIR_USERNAME:
+    description: 'Deprecated: use gigalixir_email instead'
+    required: false
+    default: ''
+    deprecationMessage: 'GIGALIXIR_USERNAME is deprecated. Use gigalixir_email instead.'
+  GIGALIXIR_PASSWORD:
+    description: 'Deprecated: use gigalixir_api_key instead'
+    required: false
+    default: ''
+    deprecationMessage: 'GIGALIXIR_PASSWORD is deprecated. Use gigalixir_api_key instead.'
+  GIGALIXIR_APP:
+    description: 'Deprecated: use app_name instead'
+    required: false
+    default: ''
+    deprecationMessage: 'GIGALIXIR_APP is deprecated. Use app_name instead.'
+  GIGALIXIR_CLEAN:
+    description: 'Deprecated: use clean_build_cache instead'
+    required: false
+    default: ''
+    deprecationMessage: 'GIGALIXIR_CLEAN is deprecated. Use clean_build_cache instead.'
+  MIGRATIONS:
+    description: 'Not supported in v1. Use @v0 for SSH-based migration support.'
+    required: false
+    default: ''
+    deprecationMessage: 'MIGRATIONS is not supported. Use gigalixir/gigalixir-action@v0 for SSH-based migration support.'
+  SSH_PRIVATE_KEY:
+    description: 'Not supported in v1. Use @v0 for SSH-based migration support.'
+    required: false
+    default: ''
+    deprecationMessage: 'SSH_PRIVATE_KEY is not supported. Use gigalixir/gigalixir-action@v0 for SSH-based migration support.'
+  # Config variables can be set using the config_ prefix:
+  #   config_MY_VAR: my-value
+  # Any input starting with config_ will be set as a Gigalixir config
+  # variable (with the config_ prefix stripped) before deploying.
+
+outputs:
+  deploy_status:
+    description: 'Status of the action (success or failure)'
+  app_name:
+    description: 'The name of the Gigalixir app'
+  app_url:
+    description: 'The URL of the deployed app'
+  database_url:
+    description: 'The DATABASE_URL if a database was created'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

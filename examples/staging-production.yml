@@ -1,0 +1,67 @@
+# Staging and Production deployment workflow
+# - Push to develop → deploys to staging
+# - Push to main → deploys to production (requires approval)
+#
+# Required secrets (configure per environment in GitHub):
+#   Staging environment:
+#     - GIGALIXIR_EMAIL
+#     - GIGALIXIR_API_KEY
+#   Production environment:
+#     - GIGALIXIR_EMAIL
+#     - GIGALIXIR_API_KEY
+#
+# Setup:
+#   1. Go to Settings → Environments
+#   2. Create "staging" and "production" environments
+#   3. Add secrets to each environment
+#   4. Optionally add required reviewers to production
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+# Prevent concurrent deployments to the same environment
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://my-app-staging.gigalixirapp.com
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Deploy to Staging
+        uses: gigalixir/gigalixir-action@v1
+        with:
+          gigalixir_email: ${{ secrets.GIGALIXIR_EMAIL }}
+          gigalixir_api_key: ${{ secrets.GIGALIXIR_API_KEY }}
+          app_name: my-app-staging
+
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://my-app.gigalixirapp.com
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Deploy to Production
+        uses: gigalixir/gigalixir-action@v1
+        with:
+          gigalixir_email: ${{ secrets.GIGALIXIR_EMAIL }}
+          gigalixir_api_key: ${{ secrets.GIGALIXIR_API_KEY }}
+          app_name: my-app-prod

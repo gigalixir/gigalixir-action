@@ -1,0 +1,16 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dev.dockerfile
+    volumes:
+      # Mount source code for live editing
+      - ./src:/app/src
+      - ./__tests__:/app/__tests__
+      - ./action.yml:/app/action.yml
+      # Mount dist so builds persist
+      - ./dist:/app/dist
+      # Don't mount node_modules - use container's version
+    working_dir: /app
+    stdin_open: true
+    tty: true
