@@ -426,6 +426,19 @@ describe('Gigalixir Deploy Action', () => {
       )
     }
 
+    // Mock exec to handle git rev-parse for SHA resolution
+    function mockExecWithRevParse(sha: string): void {
+      mockedExec.exec.mockImplementation(
+        async (_cmd: string, args?: string[], options?: Record<string, unknown>) => {
+          if (args && args[0] === 'rev-parse' && options?.listeners) {
+            const listeners = options.listeners as { stdout?: (data: Buffer) => void }
+            listeners.stdout?.(Buffer.from(sha))
+          }
+          return 0
+        }
+      )
+    }
+
     beforeEach(() => {
       jest.useFakeTimers({ advanceTimers: true })
     })
@@ -488,6 +501,7 @@ describe('Gigalixir Deploy Action', () => {
         }
         return inputs[name] || ''
       })
+      mockExecWithRevParse('abc123')
 
       // First poll: old pods still running, new pod starting
       // Second poll: all new pods healthy
@@ -559,6 +573,7 @@ describe('Gigalixir Deploy Action', () => {
         }
         return inputs[name] || ''
       })
+      mockExecWithRevParse('abc123')
 
       // All polls return unhealthy pods
       mockHttpsResponses([
@@ -607,6 +622,7 @@ describe('Gigalixir Deploy Action', () => {
         }
         return inputs[name] || ''
       })
+      mockExecWithRevParse('abc123')
 
       // First poll: API error, second poll: success
       mockHttpsResponses([
