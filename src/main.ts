@@ -736,7 +736,7 @@ export async function waitForDeployment(
     await new Promise((resolve) => setTimeout(resolve, pollIntervalMs))
   }
 
-  // Timeout: get final status for error message
+  // Final check: the pod may have become healthy during the last sleep interval
   let statusSummary = 'Could not retrieve final status'
   try {
     const response = (await gigalixirApiRequest(
@@ -748,6 +748,21 @@ export async function waitForDeployment(
 
     const pods = response.data?.pods || []
     const replicasDesired = response.data?.replicas_desired || 0
+
+    const healthyNewPods = pods.filter(
+      (pod: GigalixirPod) =>
+        pod.name.startsWith(appName) &&
+        pod.sha === sha &&
+        pod.status === 'Healthy'
+    )
+
+    if (healthyNewPods.length >= replicasDesired && replicasDesired > 0) {
+      core.info(
+        `Deployment rollout complete: ${healthyNewPods.length}/${replicasDesired} healthy pods`
+      )
+      return
+    }
+
     const podSummaries = pods.map(
       (pod: GigalixirPod) =>
         `${pod.name} (sha: ${pod.sha.substring(0, 7)}, status: ${pod.status})`
