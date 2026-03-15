@@ -135,7 +135,7 @@ export async function run(): Promise<void> {
       deployTimeout > 0 &&
       (action === 'deploy' || action === 'create_deploy')
     ) {
-      const sha = process.env.GITHUB_SHA || ''
+      const sha = await resolveGitSha(core.getInput('git_ref'))
       await waitForDeployment(email, apiKey, appName, sha, deployTimeout)
     }
 
@@ -778,6 +778,20 @@ export async function waitForDeployment(
 }
 
 // Git Functions
+
+async function resolveGitSha(gitRef: string): Promise<string> {
+  const ref = gitRef || process.env.GITHUB_SHA || 'HEAD'
+  let sha = ''
+  await exec.exec('git', ['rev-parse', ref], {
+    listeners: {
+      stdout: (data: Buffer) => {
+        sha += data.toString()
+      }
+    },
+    silent: true
+  })
+  return sha.trim()
+}
 
 async function configureGitCredentials(
   email: string,
