@@ -431,7 +431,9 @@ describe('Gigalixir Deploy Action', () => {
       mockedExec.exec.mockImplementation(
         async (_cmd: string, args?: string[], options?: exec.ExecOptions) => {
           if (args && args[0] === 'rev-parse' && options?.listeners) {
-            const listeners = options.listeners as { stdout?: (data: Buffer) => void }
+            const listeners = options.listeners as {
+              stdout?: (data: Buffer) => void
+            }
             listeners.stdout?.(Buffer.from(sha))
           }
           return 0
