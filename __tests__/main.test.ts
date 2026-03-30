@@ -391,6 +391,169 @@ describe('Gigalixir Deploy Action', () => {
     })
   })
 
+  describe('configs input', () => {
+    function mockHttpsResponse(statusCode: number, body: string): void {
+      const https = require('https')
+      https.request.mockImplementation(
+        (
+          _options: unknown,
+          callback: (res: {
+            statusCode: number
+            on: (event: string, cb: (data?: string) => void) => void
+          }) => void
+        ) => {
+          const res = {
+            statusCode,
+            on: jest.fn((event: string, cb: (data?: string) => void) => {
+              if (event === 'data') cb(body)
+              if (event === 'end') cb()
+            })
+          }
+          callback(res)
+          return {
+            on: jest.fn(),
+            write: jest.fn(),
+            end: jest.fn()
+          }
+        }
+      )
+    }
+
+    it('should set config from multiline KEY=VALUE input', async () => {
+      mockedCore.getInput.mockImplementation((name: string) => {
+        const inputs: Record<string, string> = {
+          gigalixir_email: 'test@example.com',
+          gigalixir_api_key: 'test-api-key',
+          app_name: 'test-app',
+          action: 'deploy',
+          configs: 'FOO=bar\nBAZ=qux',
+          github_deployments: 'false'
+        }
+        return inputs[name] || ''
+      })
+      mockHttpsResponse(201, '{}')
+
+      await runAction()
+
+      const https = require('https')
+      const writeCall = https.request.mock.results[0].value.write
+      expect(writeCall).toHaveBeenCalledWith(
+        JSON.stringify({
+          configs: { FOO: 'bar', BAZ: 'qux' },
+          avoid_restart: true
+        })
+      )
+    })
+
+    it('should handle values containing equals signs', async () => {
+      mockedCore.getInput.mockImplementation((name: string) => {
+        const inputs: Record<string, string> = {
+          gigalixir_email: 'test@example.com',
+          gigalixir_api_key: 'test-api-key',
+          app_name: 'test-app',
+          action: 'deploy',
+          configs: 'DATABASE_URL=postgres://u:p@host/db?opt=1',
+          github_deployments: 'false'
+        }
+        return inputs[name] || ''
+      })
+      mockHttpsResponse(201, '{}')
+
+      await runAction()
+
+      const https = require('https')
+      const writeCall = https.request.mock.results[0].value.write
+      expect(writeCall).toHaveBeenCalledWith(
+        JSON.stringify({
+          configs: { DATABASE_URL: 'postgres://u:p@host/db?opt=1' },
+          avoid_restart: true
+        })
+      )
+    })
+
+    it('should skip blank lines and comments', async () => {
+      mockedCore.getInput.mockImplementation((name: string) => {
+        const inputs: Record<string, string> = {
+          gigalixir_email: 'test@example.com',
+          gigalixir_api_key: 'test-api-key',
+          app_name: 'test-app',
+          action: 'deploy',
+          configs: '# a comment\nFOO=bar\n\nBAZ=qux\n',
+          github_deployments: 'false'
+        }
+        return inputs[name] || ''
+      })
+      mockHttpsResponse(201, '{}')
+
+      await runAction()
+
+      const https = require('https')
+      const writeCall = https.request.mock.results[0].value.write
+      expect(writeCall).toHaveBeenCalledWith(
+        JSON.stringify({
+          configs: { FOO: 'bar', BAZ: 'qux' },
+          avoid_restart: true
+        })
+      )
+    })
+
+    it('should warn on invalid lines without equals sign', async () => {
+      mockedCore.getInput.mockImplementation((name: string) => {
+        const inputs: Record<string, string> = {
+          gigalixir_email: 'test@example.com',
+          gigalixir_api_key: 'test-api-key',
+          app_name: 'test-app',
+          action: 'deploy',
+          configs: 'INVALID_LINE\nFOO=bar',
+          github_deployments: 'false'
+        }
+        return inputs[name] || ''
+      })
+      mockHttpsResponse(201, '{}')
+
+      await runAction()
+
+      expect(mockedCore.warning).toHaveBeenCalledWith(
+        expect.stringContaining("no '=' found")
+      )
+      const https = require('https')
+      const writeCall = https.request.mock.results[0].value.write
+      expect(writeCall).toHaveBeenCalledWith(
+        JSON.stringify({
+          configs: { FOO: 'bar' },
+          avoid_restart: true
+        })
+      )
+    })
+
+    it('should merge configs input with legacy config_ prefix', async () => {
+      process.env.INPUT_CONFIG_LEGACY = 'old_way'
+      mockedCore.getInput.mockImplementation((name: string) => {
+        const inputs: Record<string, string> = {
+          gigalixir_email: 'test@example.com',
+          gigalixir_api_key: 'test-api-key',
+          app_name: 'test-app',
+          action: 'deploy',
+          configs: 'NEW_WAY=yes',
+          github_deployments: 'false'
+        }
+        return inputs[name] || ''
+      })
+      mockHttpsResponse(201, '{}')
+
+      await runAction()
+
+      const https = require('https')
+      const writeCall = https.request.mock.results[0].value.write
+      expect(writeCall).toHaveBeenCalledWith(
+        JSON.stringify({
+          configs: { LEGACY: 'old_way', NEW_WAY: 'yes' },
+          avoid_restart: true
+        })
+      )
+    })
+  })
+
   describe('deployment verification', () => {
     // Helper to set up https mock for sequential API responses
     function mockHttpsResponses(

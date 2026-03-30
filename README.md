@@ -34,7 +34,7 @@ A GitHub Action for deploying applications to [Gigalixir](https://gigalixir.com)
 | `deploy_timeout` | No | `0` | Max seconds to wait for deployment rollout to complete (0 = skip) |
 | `replicas` | No | | Number of replicas to run (used with `action: scale`) |
 | `size` | No | | Size of each replica between 0.5 and 128 (used with `action: scale`) |
-| `config_*` | No | | Config variables to set before deploy (see below) |
+| `configs` | No | | Config variables to set before deploy as multiline `KEY=VALUE` pairs (see below) |
 
 ## Outputs
 
@@ -219,7 +219,7 @@ Deploy an app that lives in a subdirectory using `git subtree push`:
 
 ### Set Config Variables Before Deploy
 
-Any input prefixed with `config_` will be set as a Gigalixir environment variable (with the prefix stripped) before deploying. Config is applied with `avoid_restart=true` since the deploy handles the restart.
+Use the `configs` input to set Gigalixir environment variables before deploying. Provide one `KEY=VALUE` pair per line. Config is applied with `avoid_restart=true` since the deploy handles the restart.
 
 ```yaml
 - uses: gigalixir/gigalixir-action@v1
@@ -227,9 +227,10 @@ Any input prefixed with `config_` will be set as a Gigalixir environment variabl
     gigalixir_email: ${{ secrets.GIGALIXIR_EMAIL }}
     gigalixir_api_key: ${{ secrets.GIGALIXIR_API_KEY }}
     app_name: my-app
-    config_MIX_ENV: prod
-    config_SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
-    config_DATABASE_POOL_SIZE: "10"
+    configs: |
+      MIX_ENV=prod
+      SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
+      DATABASE_POOL_SIZE=10
 ```
 
 ### Wait for Deployment Rollout

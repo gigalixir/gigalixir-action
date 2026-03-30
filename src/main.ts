@@ -171,13 +171,35 @@ export async function setAppConfig(
   apiKey: string,
   appName: string
 ): Promise<void> {
-  const prefix = 'INPUT_CONFIG_'
   const configs: Record<string, string> = {}
 
+  // Legacy: config_* prefix inputs (triggers GitHub Actions warnings)
+  const prefix = 'INPUT_CONFIG_'
   for (const [envKey, envValue] of Object.entries(process.env)) {
     if (envKey.startsWith(prefix) && envValue !== undefined) {
       const configKey = envKey.substring(prefix.length)
       configs[configKey] = envValue
+    }
+  }
+
+  // New: configs input (multiline KEY=VALUE pairs)
+  const configsInput = core.getInput('configs')
+  if (configsInput) {
+    for (const line of configsInput.split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const eqIndex = trimmed.indexOf('=')
+      if (eqIndex === -1) {
+        core.warning(`Ignoring invalid config line (no '=' found): ${trimmed}`)
+        continue
+      }
+      const key = trimmed.substring(0, eqIndex).trim()
+      const value = trimmed.substring(eqIndex + 1).trim()
+      if (!key) {
+        core.warning(`Ignoring config line with empty key: ${trimmed}`)
+        continue
+      }
+      configs[key] = value
     }
   }
 
