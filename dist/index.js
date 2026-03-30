@@ -25771,7 +25771,7 @@ async function run() {
         // Wait for deployment rollout if timeout is set
         if (deployTimeout > 0 &&
             (action === 'deploy' || action === 'create_deploy')) {
-            const sha = process.env.GITHUB_SHA || '';
+            const sha = await resolveGitSha(core.getInput('git_ref'));
             await waitForDeployment(email, apiKey, appName, sha, deployTimeout);
         }
         core.setOutput('deploy_status', 'success');
@@ -25876,6 +25876,12 @@ async function handleCreate(email, apiKey, appName) {
         core.info(`Copying config from: ${copyConfigFrom}`);
         await copyConfig(email, apiKey, appName, copyConfigFrom);
         core.info('Config copied successfully');
+    }
+    // Scale the app if size or replicas are provided
+    const replicasInput = core.getInput('replicas');
+    const sizeInput = core.getInput('size');
+    if (replicasInput || sizeInput) {
+        await handleScale(email, apiKey, appName);
     }
 }
 async function handleDestroy(email, apiKey, appName) {
@@ -26157,12 +26163,19 @@ async function waitForDeployment(email, apiKey, appName, sha, timeoutSeconds) {
         }
         await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
     }
-    // Timeout: get final status for error message
+    // Final check: the pod may have become healthy during the last sleep interval
     let statusSummary = 'Could not retrieve final status';
     try {
         const response = (await gigalixirApiRequest(email, apiKey, 'GET', `/api/apps/${encodedAppName}/status`));
         const pods = response.data?.pods || [];
         const replicasDesired = response.data?.replicas_desired || 0;
+        const healthyNewPods = pods.filter((pod) => pod.name.startsWith(appName) &&
+            pod.sha === sha &&
+            pod.status === 'Healthy');
+        if (healthyNewPods.length >= replicasDesired && replicasDesired > 0) {
+            core.info(`Deployment rollout complete: ${healthyNewPods.length}/${replicasDesired} healthy pods`);
+            return;
+        }
         const podSummaries = pods.map((pod) => `${pod.name} (sha: ${pod.sha.substring(0, 7)}, status: ${pod.status})`);
         statusSummary = `replicas_desired: ${replicasDesired}, pods: [${podSummaries.join(', ')}]`;
     }
@@ -26172,6 +26185,19 @@ async function waitForDeployment(email, apiKey, appName, sha, timeoutSeconds) {
     throw new Error(`Deployment rollout timed out after ${timeoutSeconds}s. Status: ${statusSummary}`);
 }
 // Git Functions
+async function resolveGitSha(gitRef) {
+    const ref = gitRef || process.env.GITHUB_SHA || 'HEAD';
+    let sha = '';
+    await exec.exec('git', ['rev-parse', ref], {
+        listeners: {
+            stdout: (data) => {
+                sha += data.toString();
+            }
+        },
+        silent: true
+    });
+    return sha.trim();
+}
 async function configureGitCredentials(email, apiKey) {
     core.info('Configuring git credentials...');
     // Use git credential store for authentication

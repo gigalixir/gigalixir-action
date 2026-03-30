@@ -429,9 +429,11 @@ describe('Gigalixir Deploy Action', () => {
     // Mock exec to handle git rev-parse for SHA resolution
     function mockExecWithRevParse(sha: string): void {
       mockedExec.exec.mockImplementation(
-        async (_cmd: string, args?: string[], options?: Record<string, unknown>) => {
+        async (_cmd: string, args?: string[], options?: exec.ExecOptions) => {
           if (args && args[0] === 'rev-parse' && options?.listeners) {
-            const listeners = options.listeners as { stdout?: (data: Buffer) => void }
+            const listeners = options.listeners as {
+              stdout?: (data: Buffer) => void
+            }
             listeners.stdout?.(Buffer.from(sha))
           }
           return 0
@@ -1013,6 +1015,123 @@ describe('Gigalixir Deploy Action', () => {
 
       expect(mockedCore.setFailed).toHaveBeenCalledWith(
         'At least one of replicas or size must be provided for scale action'
+      )
+    })
+  })
+
+  describe('create action with size/replicas', () => {
+    function mockHttpsResponses(
+      responses: { statusCode: number; body: string }[]
+    ): void {
+      const https = require('https')
+      let callIndex = 0
+      https.request.mockImplementation(
+        (
+          _options: unknown,
+          callback: (res: {
+            statusCode: number
+            on: (event: string, cb: (data?: string) => void) => void
+          }) => void
+        ) => {
+          const response =
+            responses[callIndex] || responses[responses.length - 1]
+          callIndex++
+          const res = {
+            statusCode: response.statusCode,
+            on: jest.fn((event: string, cb: (data?: string) => void) => {
+              if (event === 'data') cb(response.body)
+              if (event === 'end') cb()
+            })
+          }
+          callback(res)
+          return {
+            on: jest.fn(),
+            write: jest.fn(),
+            end: jest.fn()
+          }
+        }
+      )
+    }
+
+    it('should scale after creating app when size is provided', async () => {
+      mockedCore.getInput.mockImplementation((name: string) => {
+        const inputs: Record<string, string> = {
+          gigalixir_email: 'test@example.com',
+          gigalixir_api_key: 'test-api-key',
+          app_name: 'test-app',
+          action: 'create',
+          size: '1.0',
+          github_deployments: 'false'
+        }
+        return inputs[name] || ''
+      })
+
+      // 1st call: GET app (check exists) -> 404 (doesn't exist)
+      // 2nd call: POST create app -> 201
+      // 3rd call: PUT scale -> 200
+      mockHttpsResponses([
+        { statusCode: 404, body: '{"errors":{"detail":"not found"}}' },
+        { statusCode: 201, body: '{}' },
+        { statusCode: 200, body: '{}' }
+      ])
+
+      await runAction()
+
+      const https = require('https')
+      const calls = https.request.mock.calls
+
+      // Verify scale call was made
+      const scaleCall = calls.find(
+        (c: [{ path: string; method: string }]) =>
+          c[0].path === '/api/apps/test-app/scale' && c[0].method === 'PUT'
+      )
+      expect(scaleCall).toBeDefined()
+
+      // Verify scale sends the size
+      const scaleCallIndex = calls.indexOf(scaleCall)
+      const writeCall = https.request.mock.results[scaleCallIndex].value.write
+      expect(writeCall).toHaveBeenCalledWith(JSON.stringify({ size: 1 }))
+
+      expect(mockedCore.setOutput).toHaveBeenCalledWith(
+        'deploy_status',
+        'success'
+      )
+    })
+
+    it('should not scale after creating app when size is not provided', async () => {
+      mockedCore.getInput.mockImplementation((name: string) => {
+        const inputs: Record<string, string> = {
+          gigalixir_email: 'test@example.com',
+          gigalixir_api_key: 'test-api-key',
+          app_name: 'test-app',
+          action: 'create',
+          github_deployments: 'false'
+        }
+        return inputs[name] || ''
+      })
+
+      // 1st call: GET app (check exists) -> 404 (doesn't exist)
+      // 2nd call: POST create app -> 201
+      mockHttpsResponses([
+        { statusCode: 404, body: '{"errors":{"detail":"not found"}}' },
+        { statusCode: 201, body: '{}' }
+      ])
+
+      await runAction()
+
+      const https = require('https')
+      const calls = https.request.mock.calls
+
+      // Verify no scale call was made
+      const scaleCall = calls.find(
+        (c: [{ path: string; method: string }]) =>
+          c[0].path === '/api/apps/test-app/scale' && c[0].method === 'PUT'
+      )
+      expect(scaleCall).toBeUndefined()
+
+      expect(mockedCore.setOutput).toHaveBeenCalledWith(
+        'deploy_status',
+        'success'
       )
     })
   })
