@@ -285,6 +285,13 @@ async function handleCreate(
     await copyConfig(email, apiKey, appName, copyConfigFrom)
     core.info('Config copied successfully')
   }
+
+  // Scale the app if size or replicas are provided
+  const replicasInput = core.getInput('replicas')
+  const sizeInput = core.getInput('size')
+  if (replicasInput || sizeInput) {
+    await handleScale(email, apiKey, appName)
+  }
 }
 
 async function handleDestroy(

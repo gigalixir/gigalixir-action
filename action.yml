@@ -72,11 +72,11 @@ inputs:
     required: false
     default: '0'
   replicas:
-    description: 'Number of replicas to run (used with action: scale)'
+    description: 'Number of replicas to run (used with action: create, create_deploy, or scale)'
     required: false
     default: ''
   size:
-    description: 'Size of each replica between 0.5 and 128 (used with action: scale)'
+    description: 'Size of each replica between 0.5 and 128 (used with action: create, create_deploy, or scale)'
     required: false
     default: ''
   # Backwards-compatible aliases from gigalixir-action
