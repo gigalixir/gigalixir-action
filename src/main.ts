@@ -114,6 +114,7 @@ export async function run(): Promise<void> {
         break
       case 'create':
         await handleCreate(email, apiKey, appName)
+        await setAppConfig(email, apiKey, appName)
         break
       case 'destroy':
         await handleDestroy(email, apiKey, appName)
