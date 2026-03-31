@@ -110,10 +110,16 @@ inputs:
     required: false
     default: ''
     deprecationMessage: 'SSH_PRIVATE_KEY is not supported. Use gigalixir/gigalixir-action@v0 for SSH-based migration support.'
-  # Config variables can be set using the config_ prefix:
+  configs:
+    description: 'Config variables to set before deploy, as multiline KEY=VALUE pairs'
+    required: false
+    default: ''
+  # Config variables can also be set using the config_ prefix:
   #   config_MY_VAR: my-value
   # Any input starting with config_ will be set as a Gigalixir config
   # variable (with the config_ prefix stripped) before deploying.
+  # NOTE: The config_ prefix approach triggers GitHub Actions warnings
+  # about unexpected inputs. Use the "configs" input instead.
 
 outputs:
   deploy_status:

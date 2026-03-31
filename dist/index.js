@@ -25753,6 +25753,7 @@ async function run() {
                 break;
             case 'create':
                 await handleCreate(email, apiKey, appName);
+                await setAppConfig(email, apiKey, appName);
                 break;
             case 'destroy':
                 await handleDestroy(email, apiKey, appName);
@@ -25801,12 +25802,34 @@ async function run() {
     }
 }
 async function setAppConfig(email, apiKey, appName) {
-    const prefix = 'INPUT_CONFIG_';
     const configs = {};
+    // Legacy: config_* prefix inputs (triggers GitHub Actions warnings)
+    const prefix = 'INPUT_CONFIG_';
     for (const [envKey, envValue] of Object.entries(process.env)) {
         if (envKey.startsWith(prefix) && envValue !== undefined) {
             const configKey = envKey.substring(prefix.length);
             configs[configKey] = envValue;
+        }
+    }
+    // New: configs input (multiline KEY=VALUE pairs)
+    const configsInput = core.getInput('configs');
+    if (configsInput) {
+        for (const line of configsInput.split('\n')) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith('#'))
+                continue;
+            const eqIndex = trimmed.indexOf('=');
+            if (eqIndex === -1) {
+                core.warning(`Ignoring invalid config line (no '=' found): ${trimmed}`);
+                continue;
+            }
+            const key = trimmed.substring(0, eqIndex).trim();
+            const value = trimmed.substring(eqIndex + 1).trim();
+            if (!key) {
+                core.warning(`Ignoring config line with empty key: ${trimmed}`);
+                continue;
+            }
+            configs[key] = value;
         }
     }
     if (Object.keys(configs).length === 0) {
