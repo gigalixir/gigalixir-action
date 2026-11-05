@@ -25689,8 +25689,11 @@ const core = __importStar(__nccwpck_require__(7484));
 const exec = __importStar(__nccwpck_require__(5236));
 const fs = __importStar(__nccwpck_require__(9896));
 const https = __importStar(__nccwpck_require__(5692));
+const package_json_1 = __nccwpck_require__(8330);
 const GIGALIXIR_GIT_HOST = 'git.gigalixir.com';
 const GIGALIXIR_API_HOST = 'api.gigalixir.com';
+// Release version from package.json; the api parses it as plain X.Y.Z (no v prefix)
+const USER_AGENT = `GigalixirGitHubAction/${package_json_1.version}`;
 const GITHUB_API_HOST = 'api.github.com';
 function getInputWithFallback(name, deprecatedName) {
     const value = core.getInput(name);
@@ -26022,7 +26025,7 @@ async function githubApiRequest(token, method, path, body) {
                 Authorization: `Bearer ${token}`,
                 Accept: 'application/vnd.github+json',
                 'Content-Type': 'application/json',
-                'User-Agent': 'GigalixirGitHubAction/1.0',
+                'User-Agent': USER_AGENT,
                 'X-GitHub-Api-Version': '2022-11-28'
             }
         };
@@ -26111,7 +26114,7 @@ async function gigalixirApiRequest(email, apiKey, method, path, body, expectedSt
             headers: {
                 Authorization: `Basic ${auth}`,
                 'Content-Type': 'application/json',
-                'User-Agent': 'GigalixirGitHubAction/1.0'
+                'User-Agent': USER_AGENT
             }
         };
         const req = https.request(options, (res) => {
@@ -28178,6 +28181,14 @@ function parseParams (str) {
 
 module.exports = parseParams
 
+
+/***/ }),
+
+/***/ 8330:
+/***/ ((module) => {
+
+"use strict";
+module.exports = /*#__PURE__*/JSON.parse('{"name":"gigalixir-action","version":"1.0.0","description":"GitHub Action for deploying applications to Gigalixir","main":"dist/index.js","scripts":{"build":"ncc build src/main.ts -o dist --source-map --license licenses.txt","format":"prettier --write \'**/*.ts\'","format:check":"prettier --check \'**/*.ts\'","lint":"eslint src/**/*.ts","test":"jest","all":"npm run format && npm run lint && npm run test && npm run build"},"repository":{"type":"git","url":"git+https://github.com/gigalixir/gigalixir-action.git"},"keywords":["gigalixir","deploy","elixir","phoenix","github-action"],"author":"Gigalixir","license":"MIT","bugs":{"url":"https://github.com/gigalixir/gigalixir-action/issues"},"homepage":"https://github.com/gigalixir/gigalixir-action#readme","dependencies":{"@actions/core":"^1.10.1","@actions/exec":"^1.1.1"},"devDependencies":{"@types/jest":"^29.5.12","@types/node":"^20.11.24","@typescript-eslint/eslint-plugin":"^7.1.0","@typescript-eslint/parser":"^7.1.0","@vercel/ncc":"^0.38.1","eslint":"^8.57.0","eslint-plugin-github":"^4.10.2","jest":"^29.7.0","prettier":"^3.2.5","ts-jest":"^29.1.2","typescript":"^5.3.3"}}');
 
 /***/ })
 

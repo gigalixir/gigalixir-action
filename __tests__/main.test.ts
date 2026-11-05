@@ -1298,4 +1298,43 @@ describe('Gigalixir Deploy Action', () => {
       )
     })
   })
+
+  describe('user agent', () => {
+    it('should send GigalixirGitHubAction/<package version> to the api', async () => {
+      const https = require('https')
+      https.request.mockImplementation(
+        (
+          _options: unknown,
+          callback: (res: {
+            statusCode: number
+            on: (event: string, cb: (data?: string) => void) => void
+          }) => void
+        ) => {
+          callback({
+            statusCode: 201,
+            on: jest.fn((event: string, cb: (data?: string) => void) => {
+              if (event === 'data') cb('{}')
+              if (event === 'end') cb()
+            })
+          })
+          return { on: jest.fn(), write: jest.fn(), end: jest.fn() }
+        }
+      )
+      process.env.INPUT_CONFIG_FOO = 'bar'
+
+      await runAction()
+
+      const { version } = require('../package.json')
+      expect(version).toMatch(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/)
+      expect(https.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hostname: 'api.gigalixir.com',
+          headers: expect.objectContaining({
+            'User-Agent': `GigalixirGitHubAction/${version}`
+          })
+        }),
+        expect.any(Function)
+      )
+    })
+  })
 })
