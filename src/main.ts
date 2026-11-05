@@ -2,9 +2,12 @@ import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as fs from 'fs'
 import * as https from 'https'
+import { version } from '../package.json'
 
 const GIGALIXIR_GIT_HOST = 'git.gigalixir.com'
 const GIGALIXIR_API_HOST = 'api.gigalixir.com'
+// Release version from package.json; the api parses it as plain X.Y.Z (no v prefix)
+const USER_AGENT = `GigalixirGitHubAction/${version}`
 const GITHUB_API_HOST = 'api.github.com'
 
 type ActionType = 'deploy' | 'create' | 'destroy' | 'create_deploy' | 'scale'
@@ -501,7 +504,7 @@ async function githubApiRequest<T>(
         Authorization: `Bearer ${token}`,
         Accept: 'application/vnd.github+json',
         'Content-Type': 'application/json',
-        'User-Agent': 'GigalixirGitHubAction/1.0',
+        'User-Agent': USER_AGENT,
         'X-GitHub-Api-Version': '2022-11-28'
       }
     }
@@ -661,7 +664,7 @@ async function gigalixirApiRequest(
       headers: {
         Authorization: `Basic ${auth}`,
         'Content-Type': 'application/json',
-        'User-Agent': 'GigalixirGitHubAction/1.0'
+        'User-Agent': USER_AGENT
       }
     }
 
